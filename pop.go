@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+// Corn is a `map[string]interface{}` used to describe the files and
+// directories to generate.
 type Corn map[string]interface{}
 
 // Generate populates a new tree of files on disk populated with the given
