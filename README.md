@@ -1,4 +1,5 @@
 # Popcorn
+[![Build Status](https://travis-ci.org/aseure/pop.svg?branch=master)](https://travis-ci.org/aseure/pop)
 
 Go standard library makes file manipulation very easy. However, it's a little
 cumbersome to generate a whole file architecture easily. This `pop` Go package
