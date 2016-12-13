@@ -23,7 +23,8 @@ anything went wrong during the generation.
 
 The `pop.GenerateFromRoot` does the same as `pop.Generate` but will produce the
 resulting files and directories within the providided directory path. It also
-returns a non-nil error if anything went wrong during the generation.
+returns a non-nil error if anything went wrong during the generation. If the
+root directory already exists, it will be deleted first.
 
 ## Example
 

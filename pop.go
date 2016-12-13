@@ -34,6 +34,10 @@ func GenerateFromRoot(root string, files Corn) (err error) {
 		return fmt.Errorf("pop: root directory cannot be nil", err)
 	}
 
+	if err := os.RemoveAll(root); err != nil {
+		return fmt.Errorf("pop: cannot delete pre-existing root directory %s: %s", root, err)
+	}
+
 	if err = createDir(root); err != nil {
 		return err
 	}
