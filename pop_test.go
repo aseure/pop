@@ -1,4 +1,4 @@
-package gotree
+package pop
 
 import (
 	"io/ioutil"
@@ -9,7 +9,7 @@ import (
 )
 
 func TestCreateEmpty(t *testing.T) {
-	root, err := Generate([]File{})
+	root, err := Generate(nil)
 	defer os.RemoveAll(root)
 	if err != nil {
 		t.Fatalf("TestCreateNothing: unexpected error: %s", err)
@@ -26,7 +26,7 @@ func TestCreateEmpty(t *testing.T) {
 
 func TestCreateEmptyFromNonExistingRoot(t *testing.T) {
 	root := "path/does/not/exist/"
-	err := GenerateFromRoot(root, []File{})
+	err := GenerateFromRoot(root, nil)
 	defer os.RemoveAll("path")
 	if err != nil {
 		t.Fatalf("TestCreateEmptyFromNonExistingRoot: unexpected error: %s", err)
@@ -42,13 +42,13 @@ func TestCreateEmptyFromNonExistingRoot(t *testing.T) {
 }
 
 func TestCreateEmptyFromExistingRoot(t *testing.T) {
-	root, err := ioutil.TempDir("", "gotree_test_")
+	root, err := ioutil.TempDir("", "go_test_")
 	defer os.RemoveAll(root)
 	if err != nil {
 		t.Fatalf("TestCreateEmptyFromExistingRoot: cannot create root directory: %s", err)
 	}
 
-	if err = GenerateFromRoot(root, []File{}); err != nil {
+	if err = GenerateFromRoot(root, nil); err != nil {
 		t.Fatalf("TestCreateEmptyFromExistingRoot: unexpected error: %s", err)
 	}
 
@@ -62,19 +62,21 @@ func TestCreateEmptyFromExistingRoot(t *testing.T) {
 }
 
 func TestCreateOneDir(t *testing.T) {
-	files := []File{
-		{"README.md", "# This is the title"},
-		{"json/", []File{
-			{"test1.json", `{"key1":"value1","key2":"value2"}`},
-			{"test2.json", `{"key3":"value3","key4":"value4"}`},
-		}},
-		{"vendor/", nil},
-		{"src/", []File{
-			{"one.cc", "int main() {}"},
-			{"two.cc", "#include <iostream>"},
-			{"empty.txt", nil},
-		}},
-		{"test/", File{".gitkeep", nil}},
+	files := Corn{
+		"README.md": "# This is the title",
+		"json/": Corn{
+			"test1.json": `{"key1":"value1","key2":"value2"}`,
+			"test2.json": `{"key3":"value3","key4":"value4"}`,
+		},
+		"vendor/": nil,
+		"src/": Corn{
+			"one.cc":    "int main() {}",
+			"two.cc":    "#include <iostream>",
+			"empty.txt": nil,
+		},
+		"test/": Corn{
+			".gitkeep": nil,
+		},
 	}
 
 	root, err := Generate(files)
@@ -83,65 +85,65 @@ func TestCreateOneDir(t *testing.T) {
 		t.Fatalf("TestCreateComplex: cannot generate tree: %s", err)
 	}
 
-	checkTree(t, root, files)
-}
-
-func checkTree(t *testing.T, root string, files []File) {
-	for _, file := range files {
-		if strings.HasSuffix(file.Path, "/") {
-			checkDir(t, root, file)
-		} else {
-			checkFile(t, root, file)
-		}
+	for name, content := range files {
+		checkTree(t, root, name, content)
 	}
 }
 
-func checkDir(t *testing.T, root string, file File) {
-	dirPath := path.Join(root, file.Path)
+func checkTree(t *testing.T, root string, name string, content interface{}) {
+	if strings.HasSuffix(name, "/") {
+		checkDir(t, root, name, content)
+	} else {
+		checkFile(t, root, name, content)
+	}
+}
+
+func checkDir(t *testing.T, root string, name string, content interface{}) {
+	dirPath := path.Join(root, name)
 
 	if !doesDirExist(dirPath) {
 		t.Fatalf("checkDir: %s directory should have been generated", dirPath)
 	}
 
-	if file.Content == nil {
+	if content == nil {
 		if countFiles(t, dirPath) > 0 || countDirectories(t, dirPath) > 0 {
 			t.Fatalf("checkDir: %s directory should be empty", dirPath)
 		}
-	} else {
-		switch content := file.Content.(type) {
-		case File:
-			checkTree(t, dirPath, []File{content})
+		return
+	}
 
-		case []File:
-			checkTree(t, dirPath, content)
-
-		default:
-			t.Fatalf("checkDir: %s directory content should be of type `gotree.File` or `[]gotree.File` but got %T instead", dirPath, content)
+	switch content := content.(type) {
+	case Corn:
+		for subName, subContent := range content {
+			checkTree(t, dirPath, subName, subContent)
 		}
+
+	default:
+		t.Fatalf("checkDir: %s directory content should be of type `pop.Corn` but got %T instead", dirPath, content)
 	}
 }
 
-func checkFile(t *testing.T, root string, file File) {
-	filePath := path.Join(root, file.Path)
+func checkFile(t *testing.T, root string, name string, content interface{}) {
+	filePath := path.Join(root, name)
 
 	if !doesFileExist(filePath) {
 		t.Fatalf("checkFile: %s file should have been generated", filePath)
 	}
 
-	if file.Content == nil {
+	if content == nil {
 		return
 	}
 
-	content, ok := file.Content.(string)
+	text, ok := content.(string)
 	if !ok {
 		t.Fatalf("checkFile: %s file content should be of type `string`")
 	}
 
-	if content == "" {
+	if text == "" {
 		return
 	}
 
-	checkFileContent(t, filePath, content)
+	checkFileContent(t, filePath, text)
 }
 
 func checkFileContent(t *testing.T, path string, expected string) {
