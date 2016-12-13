@@ -1,4 +1,4 @@
-# Popcorn
+# pop.Corn
 [![Build Status](https://travis-ci.org/aseure/pop.svg?branch=master)](https://travis-ci.org/aseure/pop)
 
 Go standard library makes file manipulation very easy. However, it's a little
