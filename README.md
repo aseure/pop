@@ -10,6 +10,21 @@ for integration testing has never been so fast and fun.
 
 ![pop](https://github.com/aseure/pop/raw/master/pop.gif)
 
+## What's included?
+
+Only one structure and two functions are exported.
+
+The `pop.Corn` structure is actually a `map[string]interface{}` holding all
+your files and directories, because a 14-character difference is a lot.
+
+The `pop.Generate` generates the given files and directories in a new
+directory. Its path is returned as long as an error which may be non-nil if
+anything went wrong during the generation.
+
+The `pop.GenerateFromRoot` does the same as `pop.Generate` but will produce the
+resulting files and directories within the providided directory path. It also
+returns a non-nil error if anything went wrong during the generation.
+
 ## Example
 
 In the following example, we are generating a tree of files under the
