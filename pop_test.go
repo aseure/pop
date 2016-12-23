@@ -1,6 +1,7 @@
 package pop
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"path"
@@ -65,7 +66,7 @@ func TestCreateOneDir(t *testing.T) {
 	files := Corn{
 		"README.md": "# This is the title",
 		"json/": Corn{
-			"test1.json": `{"key1":"value1","key2":"value2"}`,
+			"test1.json": bytes.NewBufferString(`{"key1":"value1","key2":"value2"}`),
 			"test2.json": `{"key3":"value3","key4":"value4"}`,
 		},
 		"vendor/": nil,
@@ -123,6 +124,18 @@ func checkDir(t *testing.T, root string, name string, content interface{}) {
 	}
 }
 
+func contentToString(content interface{}) (string, error) {
+	r, err := contentToReader(content)
+	if err != nil {
+		return "", err
+	}
+	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
 func checkFile(t *testing.T, root string, name string, content interface{}) {
 	filePath := path.Join(root, name)
 
@@ -134,9 +147,9 @@ func checkFile(t *testing.T, root string, name string, content interface{}) {
 		return
 	}
 
-	text, ok := content.(string)
-	if !ok {
-		t.Fatalf("checkFile: %s file content should be of type `string`")
+	text, err := contentToString(content)
+	if err != nil {
+		t.Fatalf("checkFile: %s file %s", filePath, err)
 	}
 
 	if text == "" {

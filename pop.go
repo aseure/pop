@@ -1,7 +1,9 @@
 package pop
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -106,17 +108,26 @@ func generateFile(root string, name string, content interface{}) error {
 	}
 	defer f.Close()
 
-	// Generate the content only if it is non-nil or a non-empty string
-	if content != nil {
-		text, ok := content.(string)
-		if !ok {
-			return fmt.Errorf("pop: file content of %s should be a string", filePath)
-		}
-
-		if _, err = f.WriteString(text); err != nil {
-			return fmt.Errorf("pop: cannot write file %s: %s", filePath, err)
-		}
+	// Generate the content if it's nil, a string, or an io.Reader
+	r, err := contentToReader(content)
+	if err != nil {
+		return fmt.Errorf("pop: file content of %s is not valid: %s", filePath, err)
 	}
-
+	if _, err := io.Copy(f, r); err != nil {
+		return fmt.Errorf("pop: cannot write file %s: %s", filePath, err)
+	}
 	return nil
+}
+
+func contentToReader(content interface{}) (io.Reader, error) {
+	if content == nil {
+		return bytes.NewReader([]byte{}), nil
+	}
+	switch v := content.(type) {
+	case string:
+		return bytes.NewBufferString(v), nil
+	case io.Reader:
+		return v, nil
+	}
+	return nil, fmt.Errorf("unsuported type")
 }
