@@ -59,5 +59,5 @@ tree := pop.Corn{
 
 All directory names must end with a slash and can either be `nil` or contain a
 new `pop.Corn` instance. Files are represented by non-slash-terminating string
-names and a string content, which can also be either `nil` or an empty string
+names and a string or `io.Reader` content, which can also be either `nil` or an empty string
 to generate an empty file.
