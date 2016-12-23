@@ -111,7 +111,7 @@ func generateFile(root string, name string, content interface{}) error {
 	// Generate the content only if it is non-nil or a non-empty string
 	r, err := contentToReader(content)
 	if err != nil {
-		return fmt.Errorf("pop: file content of %s is not valid")
+		return fmt.Errorf("pop: file content of %s is not valid: %s", filePath, err)
 	}
 	if _, err := io.Copy(f, r); err != nil {
 		return fmt.Errorf("pop: cannot write file %s: %s", filePath, err)
