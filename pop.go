@@ -108,7 +108,7 @@ func generateFile(root string, name string, content interface{}) error {
 	}
 	defer f.Close()
 
-	// Generate the content only if it is non-nil or a non-empty string
+	// Generate the content if it's nil, a string, or an io.Reader
 	r, err := contentToReader(content)
 	if err != nil {
 		return fmt.Errorf("pop: file content of %s is not valid: %s", filePath, err)
