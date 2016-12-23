@@ -37,27 +37,29 @@ automatically generated `root` directory. It contains:
  - a `test/` directory with an empty file in it
 
 ```go
-tree := pop.Corn{
-		"README.md": "# This is the title",
-		"json/": pop.Corn{
-			"test1.json": `{"key1":"value1","key2":"value2"}`,
-			"test2.json": `{"key3":"value3","key4":"value4"}`,
-		},
-		"vendor/": nil,
-		"src/": pop.Corn{
-			"one.cc":    "int main() {}",
-			"two.cc":    "#include <iostream>",
-			"empty.txt": nil,
-		},
-		"test/": pop.Corn{
-			".gitkeep": nil,
-		},
-
-	root, err := Generate(files)
+files := Corn{
+    "README.md": "# This is the title",
+    "json/": Corn{
+        "test1.json": bytes.NewBufferString(`{"key1":"value1","key2":"value2"}`),
+        "test2.json": `{"key3":"value3","key4":"value4"}`,
+    },
+    "vendor/": nil,
+    "src/": Corn{
+        "one.cc":    "int main() {}",
+        "two.cc":    "#include <iostream>",
+        "empty.txt": nil,
+    },
+    "test/": Corn{
+        ".gitkeep": nil,
+    },
 }
+
+root, err := Generate(files)
 ```
 
 All directory names must end with a slash and can either be `nil` or contain a
-new `pop.Corn` instance. Files are represented by non-slash-terminating string
-names and a string or `io.Reader` content, which can also be either `nil` or an empty string
-to generate an empty file.
+new `pop.Corn` instance.
+
+Files are represented by non-slash-terminating string names and their content
+as a `string` or an  `io.Reader`. If the content is `nil` or an empty string,
+the generated file will be empty.
