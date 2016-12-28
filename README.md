@@ -37,24 +37,24 @@ automatically generated `root` directory. It contains:
  - a `test/` directory with an empty file in it
 
 ```go
-files := Corn{
+files := pop.Corn{
     "README.md": "# This is the title",
-    "json/": Corn{
+    "json/": pop.Corn{
         "test1.json": bytes.NewBufferString(`{"key1":"value1","key2":"value2"}`),
         "test2.json": `{"key3":"value3","key4":"value4"}`,
     },
     "vendor/": nil,
-    "src/": Corn{
+    "src/": pop.Corn{
         "one.cc":    "int main() {}",
         "two.cc":    "#include <iostream>",
         "empty.txt": nil,
     },
-    "test/": Corn{
+    "test/": pop.Corn{
         ".gitkeep": nil,
     },
 }
 
-root, err := Generate(files)
+root, err := pop.Generate(files)
 ```
 
 All directory names must end with a slash and can either be `nil` or contain a
